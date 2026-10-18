@@ -28,6 +28,7 @@ button.ghost{background:transparent;color:var(--soft);border:1.5px solid var(--l
 /* recipient */
 #view{min-height:80vh;display:flex;flex-direction:column;justify-content:center;text-align:center}
 #view .to{font:700 30px "Dancing Script",cursive;color:var(--soft);margin:0}
+#pic{display:block;width:70%;max-width:260px;aspect-ratio:1;object-fit:cover;border-radius:24px;margin:0 auto 18px;border:4px solid var(--card);box-shadow:0 8px 30px rgba(232,49,111,.28)}
 #msg{font-size:19px;line-height:1.7;margin:18px 0 8px;min-height:3.4em;white-space:pre-wrap}
 #ask{font:700 38px/1.15 "Dancing Script",cursive;color:var(--rose);margin:20px 0 28px}
 .btns{display:flex;gap:16px;justify-content:center;align-items:center;min-height:90px}
@@ -64,6 +65,7 @@ button.ghost{background:transparent;color:var(--soft);border:1.5px solid var(--l
 
   <section id="view" class="hide">
     <div id="ask-wrap">
+      <img id="pic" class="hide" alt="" src="anh.jpg">
       <p class="to" id="hello"></p>
       <div id="msg"></div>
       <div id="ask"></div>
@@ -105,10 +107,12 @@ button.ghost{background:transparent;color:var(--soft);border:1.5px solid var(--l
     show(d,true);
   };
 
-  var dodges=0,lines=['Không','Chắc chưa?','Nghĩ lại đi','Đừng mà','Đừng vậy mà','Anh buồn đó','Thôi bấm Đồng ý đi'];
+  var pic=$('pic');pic.onload=function(){pic.classList.remove('hide')};
+  if(pic.complete&&pic.naturalWidth>0)pic.classList.remove('hide');
+  var dodges=0,lines=['Không','Chắc chưa?','Nghĩ lại đi','Đừng mà','Đừng vậy mà','Mình buồn đó','Thôi bấm Đồng ý đi'];
   function show(d,preview){
     $('make').classList.add('hide');$('view').classList.remove('hide');
-    $('hello').textContent='Em! anh bẩu này '+d.to+',';
+    $('hello').textContent='Gửi '+d.to+',';
     $('ask').textContent=d.q;
     $('thanks').textContent='Yay, cảm ơn '+d.to+'!';
     $('who').textContent=d.from?('Từ giờ có '+d.from+' ở đây rồi.'):'Từ giờ không còn một mình nữa.';
