@@ -112,7 +112,7 @@ button.ghost{background:transparent;color:var(--soft);border:1.5px solid var(--l
   var dodges=0,lines=['Không','Chắc chưa?','Nghĩ lại đi','Đừng mà','Đừng vậy mà','Mình buồn đó','Thôi bấm Đồng ý đi'];
   function show(d,preview){
     $('make').classList.add('hide');$('view').classList.remove('hide');
-    $('hello').textContent='d.to'+'Anh bẩu này '+'...';
+    $('hello').textContent='Gửi '+d.to+',';
     $('ask').textContent=d.q;
     $('thanks').textContent='Yay, cảm ơn '+d.to+'!';
     $('who').textContent=d.from?('Từ giờ có '+d.from+' ở đây rồi.'):'Từ giờ không còn một mình nữa.';
