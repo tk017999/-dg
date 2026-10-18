@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Có điều này mình muốn nói</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600&family=Dancing+Script:wght@600;700&display=swap&subset=vietnamese" rel="stylesheet">
+<style>
+:root{--bg:#fdeff4;--ink:#3a1442;--soft:#7a4f86;--rose:#e8316f;--card:#ffffff;--line:#f3c6d8;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1d0e24;--ink:#fbe6ef;--soft:#c9a3d4;--rose:#ff6b9a;--card:#2c1736;--line:#4d2a5b;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#1d0e24;--ink:#fbe6ef;--soft:#c9a3d4;--rose:#ff6b9a;--card:#2c1736;--line:#4d2a5b;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{background:var(--bg);color:var(--ink);font:400 16px/1.6 "Be Vietnam Pro",system-ui,sans-serif;display:flex;justify-content:center;overflow-x:hidden}
+main{width:100%;max-width:440px;padding:32px 20px 48px}
+h1{font:700 44px/1.1 "Dancing Script","Segoe Script",cursive;margin:0 0 8px;color:var(--rose)}
+p.sub{color:var(--soft);margin:0 0 24px}
+label{display:block;font-weight:600;font-size:14px;margin:16px 0 6px}
+input,textarea{width:100%;font:inherit;color:var(--ink);background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:12px 14px}
+input:focus,textarea:focus,button:focus-visible{outline:3px solid var(--rose);outline-offset:2px}
+textarea{min-height:120px;resize:vertical}
+button{font:600 16px "Be Vietnam Pro",system-ui,sans-serif;border:0;border-radius:999px;padding:13px 26px;cursor:pointer;background:var(--rose);color:#fff}
+button.ghost{background:transparent;color:var(--soft);border:1.5px solid var(--line)}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+.out{margin-top:24px;background:var(--card);border:1.5px dashed var(--rose);border-radius:14px;padding:14px;word-break:break-all;font-size:13px}
+.hide{display:none!important}
+/* recipient */
+#view{min-height:80vh;display:flex;flex-direction:column;justify-content:center;text-align:center}
+#view .to{font:700 30px "Dancing Script",cursive;color:var(--soft);margin:0}
+#msg{font-size:19px;line-height:1.7;margin:18px 0 8px;min-height:3.4em;white-space:pre-wrap}
+#ask{font:700 38px/1.15 "Dancing Script",cursive;color:var(--rose);margin:20px 0 28px}
+.btns{display:flex;gap:16px;justify-content:center;align-items:center;min-height:90px}
+#yes{transition:transform .25s;transform-origin:center}
+#no{background:var(--card);color:var(--soft);border:1.5px solid var(--line)}
+#done h2{font:700 46px/1.1 "Dancing Script",cursive;color:var(--rose);margin:0 0 10px}
+.heart{position:fixed;bottom:-30px;pointer-events:none;color:var(--rose);animation:up var(--d) linear forwards;z-index:9}
+@keyframes up{to{transform:translateY(-115vh) rotate(var(--r));opacity:0}}
+@media (prefers-reduced-motion:reduce){.heart{animation-duration:.01s}}
+</style>
+</head>
+<body>
+<main>
+  <section id="make">
+    <h1>Viết lời tỏ tình</h1>
+    <p class="sub">Điền vào, bấm tạo link rồi gửi cho người ấy. Họ sẽ thấy lời nhắn của bạn và nút “Đồng ý” rất khó bỏ qua.</p>
+    <label for="to">Tên người nhận</label>
+    <input id="to" maxlength="40" placeholder="Ví dụ: Lan">
+    <label for="from">Tên của bạn</label>
+    <input id="from" maxlength="40" placeholder="Ví dụ: Hùng">
+    <label for="text">Lời nhắn</label>
+    <textarea id="text" maxlength="500" placeholder="Từ lúc quen bạn, mỗi ngày của mình đều vui hơn..."></textarea>
+    <label for="q">Câu hỏi cuối</label>
+    <input id="q" maxlength="60" value="Làm người yêu mình nhé?">
+    <div class="row">
+      <button id="gen">Tạo link</button>
+      <button id="prev" class="ghost">Xem thử</button>
+    </div>
+    <div id="out" class="out hide">
+      <div id="link"></div>
+      <div class="row"><button id="copy">Sao chép link</button></div>
+    </div>
+  </section>
+
+  <section id="view" class="hide">
+    <div id="ask-wrap">
+      <p class="to" id="hello"></p>
+      <div id="msg"></div>
+      <div id="ask"></div>
+      <div class="btns" id="btns">
+        <button id="yes">Đồng ý</button>
+        <button id="no">Không</button>
+      </div>
+    </div>
+    <div id="done" class="hide">
+      <h2 id="thanks"></h2>
+      <p class="sub" id="who"></p>
+    </div>
+  </section>
+</main>
+
+<script>
+(function(){
+  var $=function(i){return document.getElementById(i)};
+  function enc(o){return btoa(unescape(encodeURIComponent(JSON.stringify(o))))}
+  function dec(s){return JSON.parse(decodeURIComponent(escape(atob(s))))}
+  function read(){return {to:$('to').value.trim(),from:$('from').value.trim(),text:$('text').value.trim(),q:$('q').value.trim()||'Làm người yêu mình nhé?'}}
+
+  $('gen').onclick=function(){
+    var d=read();
+    if(!d.to||!d.text){alert('Hãy điền tên người nhận và lời nhắn nhé.');return}
+    var url=location.href.split('#')[0]+'#'+enc(d);
+    $('link').textContent=url;$('out').classList.remove('hide');
+    $('out').dataset.url=url;
+  };
+  $('copy').onclick=function(){
+    var u=$('out').dataset.url,b=$('copy');
+    function ok(){b.textContent='Đã sao chép';setTimeout(function(){b.textContent='Sao chép link'},1800)}
+    try{navigator.clipboard.writeText(u).then(ok,function(){sel()})}catch(e){sel()}
+    function sel(){var r=document.createRange();r.selectNodeContents($('link'));var s=getSelection();s.removeAllRanges();s.addRange(r)}
+  };
+  $('prev').onclick=function(){
+    var d=read();
+    if(!d.to||!d.text){alert('Hãy điền tên người nhận và lời nhắn nhé.');return}
+    show(d,true);
+  };
+
+  var dodges=0,lines=['Không','Chắc chưa?','Nghĩ lại đi','Đừng mà','Đừng vậy mà','Mình buồn đó','Thôi bấm Đồng ý đi'];
+  function show(d,preview){
+    $('make').classList.add('hide');$('view').classList.remove('hide');
+    $('hello').textContent='Gửi '+d.to+',';
+    $('ask').textContent=d.q;
+    $('thanks').textContent='Yay, cảm ơn '+d.to+'!';
+    $('who').textContent=d.from?('Từ giờ có '+d.from+' ở đây rồi.'):'Từ giờ không còn một mình nữa.';
+    var m=$('msg'),i=0,t=d.text;m.textContent='';
+    var timer=setInterval(function(){m.textContent=t.slice(0,++i);if(i>=t.length)clearInterval(timer)},35);
+    var yes=$('yes'),no=$('no');
+    function dodge(e){
+      if(e&&e.preventDefault)e.preventDefault();
+      dodges++;
+      no.textContent=lines[Math.min(dodges,lines.length-1)];
+      yes.style.transform='scale('+Math.min(1+dodges*.18,2.4)+')';
+      no.style.position='fixed';
+      var w=no.offsetWidth,h=no.offsetHeight;
+      no.style.left=Math.max(8,Math.random()*(innerWidth-w-16))+'px';
+      no.style.top=Math.max(8,Math.random()*(innerHeight-h-16))+'px';
+    }
+    no.onpointerenter=dodge;no.ontouchstart=dodge;no.onclick=dodge;
+    yes.onclick=function(){
+      $('ask-wrap').classList.add('hide');$('done').classList.remove('hide');
+      no.style.display='none';rain();
+      if(preview){var b=document.createElement('button');b.className='ghost';b.textContent='Quay lại chỉnh sửa';b.style.marginTop='20px';
+        b.onclick=function(){location.reload()};$('done').appendChild(b)}
+    };
+  }
+  function rain(){
+    var n=matchMedia('(prefers-reduced-motion:reduce)').matches?8:46;
+    for(var i=0;i<n;i++){
+      var h=document.createElement('span');h.className='heart';h.textContent='♥';
+      h.style.left=Math.random()*100+'vw';h.style.fontSize=(16+Math.random()*30)+'px';
+      h.style.setProperty('--d',(3+Math.random()*3)+'s');h.style.setProperty('--r',(Math.random()*80-40)+'deg');
+      h.style.animationDelay=Math.random()*1.5+'s';
+      document.body.appendChild(h);
+      (function(x){setTimeout(function(){x.remove()},8000)})(h);
+    }
+  }
+  if(location.hash.length>1){try{show(dec(location.hash.slice(1)),false)}catch(e){}}
+})();
+</script>
+</body>
+</html>
